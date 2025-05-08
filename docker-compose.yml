@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  n8n:
+    image: n8nio/n8n
+    ports:
+      - "${N8N_PORT}:${N8N_PORT}"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=${N8N_BASIC_AUTH_ACTIVE}
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD}
+      - N8N_HOST=${N8N_HOST}
+      - N8N_PORT=${N8N_PORT}
+      - WEBHOOK_URL=${WEBHOOK_URL}
+      - N8N_TRUST_PROXY={N8N_TRUST_PROXY}
+    volumes:
+      - .data:/home/node/.n8n
+    restart: unless-stopped
