@@ -1,0 +1,73 @@
+version: "3"
+
+services:
+  n8n:
+    image: n8nio/n8n:1.93.0
+    ports:
+      - "${N8N_PORT}:${N8N_PORT}"
+    environment:
+      - N8N_HOST=${N8N_HOST}
+      - N8N_PORT=${N8N_PORT}
+      - WEBHOOK_URL=${WEBHOOK_URL}
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD}
+      - N8N_BASIC_AUTH_ACTIVE=${N8N_BASIC_AUTH_ACTIVE}
+      - N8N_TRUST_PROXY=${N8N_TRUST_PROXY}
+      - N8N_METRICS=${N8N_METRICS}
+      - DB_TYPE=${DB_TYPE}
+      - DB_POSTGRESDB_DATABASE=${DB_POSTGRESDB_DATABASE}
+      - DB_POSTGRESDB_HOST=${DB_POSTGRESDB_HOST}
+      - DB_POSTGRESDB_PORT=${DB_POSTGRESDB_PORT}
+      - DB_POSTGRESDB_USER=${DB_POSTGRESDB_USER}
+      - DB_POSTGRESDB_PASSWORD=${DB_POSTGRESDB_PASSWORD}
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
+      - TZ=${TZ}
+      - EXECUTIONS_MODE=${EXECUTIONS_MODE}
+      - QUEUE_BULL_REDIS_HOST=${QUEUE_BULL_REDIS_HOST}
+      - QUEUE_BULL_REDIS_PORT=${QUEUE_BULL_REDIS_PORT}
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      - postgres
+      - redis
+    restart: always
+    container_name: n8n
+    networks:
+      - n8n_network
+
+  postgres:
+    image: postgres:15
+    ports:
+      - "${DB_POSTGRESDB_PORT}:${DB_POSTGRESDB_PORT}"
+    environment:
+      - POSTGRES_USER=${DB_POSTGRESDB_USER}
+      - POSTGRES_PASSWORD=${DB_POSTGRESDB_PASSWORD}
+      - POSTGRES_DB=${DB_POSTGRESDB_DATABASE}
+      - TZ=${TZ}
+    volumes:
+      - n8n_postgres:/var/lib/postgresql/data
+    restart: always
+    container_name: n8n_postgres
+    networks:
+      - n8n_network
+
+  redis:
+    image: redis:6
+    ports:
+      - "${QUEUE_BULL_REDIS_PORT}:${QUEUE_BULL_REDIS_PORT}"
+    volumes:
+      - n8n_redis:/data
+    command: redis-server --appendonly yes
+    restart: always
+    container_name: n8n_redis
+    networks:
+      - n8n_network
+
+volumes:
+  n8n_data:
+  n8n_postgres:
+  n8n_redis:    
+
+networks:
+  n8n_network:
+    driver: bridge
