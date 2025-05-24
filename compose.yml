@@ -1,8 +1,10 @@
-version: "3"
-
 services:
   n8n:
-    image: n8nio/n8n:1.93.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        N8N_VERSION: ${N8N_VERSION}
     ports:
       - "${N8N_PORT}:${N8N_PORT}"
     environment:
@@ -26,7 +28,7 @@ services:
       - QUEUE_BULL_REDIS_HOST=${QUEUE_BULL_REDIS_HOST}
       - QUEUE_BULL_REDIS_PORT=${QUEUE_BULL_REDIS_PORT}
     volumes:
-      - n8n_data:/home/node/.n8n
+      - ./n8n_data:/home/node/.n8n
     depends_on:
       - postgres
       - redis
@@ -45,7 +47,7 @@ services:
       - POSTGRES_DB=${DB_POSTGRESDB_DATABASE}
       - TZ=${TZ}
     volumes:
-      - n8n_postgres:/var/lib/postgresql/data
+      - ./n8n_postgres:/var/lib/postgresql/data
     restart: always
     container_name: n8n_postgres
     networks:
@@ -56,17 +58,12 @@ services:
     ports:
       - "${QUEUE_BULL_REDIS_PORT}:${QUEUE_BULL_REDIS_PORT}"
     volumes:
-      - n8n_redis:/data
+      - ./n8n_redis:/data
     command: redis-server --appendonly yes
     restart: always
     container_name: n8n_redis
     networks:
-      - n8n_network
-
-volumes:
-  n8n_data:
-  n8n_postgres:
-  n8n_redis:    
+      - n8n_network 
 
 networks:
   n8n_network:

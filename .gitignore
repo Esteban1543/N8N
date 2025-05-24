@@ -45,3 +45,7 @@ htmlcov/
 *.pid
 *.tar
 docker-compose.override.yml
+
+n8n_data
+n8n_redis
+n8n_postgres
