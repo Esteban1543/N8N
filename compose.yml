@@ -6,7 +6,7 @@ services:
       args:
         N8N_VERSION: ${N8N_VERSION}
     ports:
-      - "${N8N_PORT}:5678"
+      - "${N8N_PORT}:${N8N_PORT}"
     environment:
       - N8N_HOST=${N8N_HOST}
       - N8N_PORT=${N8N_PORT}
