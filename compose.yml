@@ -6,7 +6,7 @@ services:
       args:
         N8N_VERSION: ${N8N_VERSION}
     ports:
-      - "${N8N_PORT}:${N8N_PORT}"
+      - "${N8N_PORT}:5678"
     environment:
       - N8N_HOST=${N8N_HOST}
       - N8N_PORT=${N8N_PORT}
@@ -40,7 +40,7 @@ services:
   postgres:
     image: postgres:15
     ports:
-      - "${DB_POSTGRESDB_PORT}:${DB_POSTGRESDB_PORT}"
+      - "${DB_POSTGRESDB_PORT}:5432"
     environment:
       - POSTGRES_USER=${DB_POSTGRESDB_USER}
       - POSTGRES_PASSWORD=${DB_POSTGRESDB_PASSWORD}
@@ -56,7 +56,7 @@ services:
   redis:
     image: redis:6
     ports:
-      - "${QUEUE_BULL_REDIS_PORT}:${QUEUE_BULL_REDIS_PORT}"
+      - "${QUEUE_BULL_REDIS_PORT}:6379"
     volumes:
       - ./n8n_redis:/data
     command: redis-server --appendonly yes
