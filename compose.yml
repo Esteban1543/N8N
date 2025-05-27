@@ -61,6 +61,7 @@ services:
       - EXECUTIONS_MODE=${EXECUTIONS_MODE}
       - QUEUE_BULL_REDIS_HOST=${QUEUE_BULL_REDIS_HOST}
       - QUEUE_BULL_REDIS_PORT=6379
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
     volumes:
       - ./n8n_data:/home/node/.n8n
     depends_on:
@@ -94,6 +95,7 @@ services:
       - QUEUE_BULL_REDIS_PORT=6379
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
       - TZ=${TZ}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
     volumes:
       - ./n8n_data:/home/node/.n8n
     depends_on:
