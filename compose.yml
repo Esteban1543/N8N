@@ -1,10 +1,42 @@
 services:
+  postgres:
+    image: postgres:15
+    ports:
+      - "${REDIS_PORT}:5432"
+    environment:
+      - POSTGRES_USER=${DB_POSTGRESDB_USER}
+      - POSTGRES_PASSWORD=${DB_POSTGRESDB_PASSWORD}
+      - POSTGRES_DB=${DB_POSTGRESDB_DATABASE}
+      - TZ=${TZ}
+    volumes:
+      - ./n8n_postgres:/var/lib/postgresql/data
+    restart: always
+    container_name: n8n_postgres
+    networks:
+      - n8n_network
+
+  redis:
+    image: redis:6
+    ports:
+      - "${QUEUE_BULL_REDIS_PORT}:6379"
+    volumes:
+      - ./n8n_redis:/data
+    command: redis-server --appendonly yes
+    restart: always
+    container_name: n8n_redis
+    networks:
+      - n8n_network 
+
   n8n:
     build:
       context: .
       dockerfile: Dockerfile
       args:
         N8N_VERSION: ${N8N_VERSION}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.8'
     ports:
       - "${N8N_PORT}:${N8N_PORT}"
     environment:
@@ -39,33 +71,39 @@ services:
     networks:
       - n8n_network
 
-  postgres:
-    image: postgres:15
-    ports:
-      - "${REDIS_PORT}:5432"
+  n8n_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        N8N_VERSION: ${N8N_VERSION}
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: '0.25'
     environment:
-      - POSTGRES_USER=${DB_POSTGRESDB_USER}
-      - POSTGRES_PASSWORD=${DB_POSTGRESDB_PASSWORD}
-      - POSTGRES_DB=${DB_POSTGRESDB_DATABASE}
+      - EXECUTIONS_MODE=queue
+      - DB_TYPE=${DB_TYPE}
+      - DB_POSTGRESDB_DATABASE=${DB_POSTGRESDB_DATABASE}
+      - DB_POSTGRESDB_HOST=${DB_POSTGRESDB_HOST}
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_USER=${DB_POSTGRESDB_USER}
+      - DB_POSTGRESDB_PASSWORD=${DB_POSTGRESDB_PASSWORD}
+      - QUEUE_BULL_REDIS_HOST=${QUEUE_BULL_REDIS_HOST}
+      - QUEUE_BULL_REDIS_PORT=6379
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
       - TZ=${TZ}
     volumes:
-      - ./n8n_postgres:/var/lib/postgresql/data
+      - ./n8n_data:/home/node/.n8n
+    depends_on:
+      - redis
+      - postgres
     restart: always
-    container_name: n8n_postgres
+    command: worker
+    container_name: n8n_worker
     networks:
       - n8n_network
-
-  redis:
-    image: redis:6
-    ports:
-      - "${QUEUE_BULL_REDIS_PORT}:6379"
-    volumes:
-      - ./n8n_redis:/data
-    command: redis-server --appendonly yes
-    restart: always
-    container_name: n8n_redis
-    networks:
-      - n8n_network 
 
 networks:
   n8n_network:
