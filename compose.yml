@@ -80,7 +80,7 @@ services:
       args:
         N8N_VERSION: ${N8N_VERSION}
     deploy:
-      replicas: 3
+      replicas: ${N8N_WORKER_REPLICAS}'
       resources:
         limits:
           cpus: '0.80'
